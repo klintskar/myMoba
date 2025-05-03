@@ -78,27 +78,46 @@ class LobbyView(arcade.View):
             data = raw
 
         if data.get("type") == "lobby_update":
-            self.players = data.get("players", [])
-            print("Updated player list:", self.players)
+            new_players = data.get("players", [])
+            if isinstance(new_players, list) and all(isinstance(p, str) for p in new_players):
+                self.players = new_players
+                print("✅ Updated player list:", self.players)
+            else:
+                print(f"❌ Invalid lobby_update data: {data}")
 
         elif data.get("type") == "start_game":
             print("Client received start_game!")
             game_view = GameView(
                 is_host=False,
                 connection=self.client_connection,
-                username=self.local_username,
+                username=self.client_connection.username,  # ✅ use final assigned name
                 all_usernames=self.players
             )
             self.window.show_view(game_view)
 
     def start_game(self):
         print("Starting game from lobby...")
+
         if self.is_host and self.server:
+            # ✅ Build player list manually: include host and all clients
+            all_usernames = [self.local_username] + list(self.server.clients.values())
+
+            print(f"Starting game with players: {all_usernames}")
+
+            # ✅ Send correct lobby info to clients
+            self.server.broadcast({
+                "type": "lobby_update",
+                "players": all_usernames
+            })
+
+            # ✅ Trigger game start for clients
             self.server.broadcast({"type": "start_game"})
-        game_view = GameView(
-            is_host=True,
-            connection=self.server,
-            username=self.local_username,
-            all_usernames=self.players
-        )
-        self.window.show_view(game_view)
+
+            # ✅ Start the game for the host
+            game_view = GameView(
+                is_host=True,
+                connection=self.server,
+                username=self.local_username,
+                all_usernames=all_usernames
+            )
+            self.window.show_view(game_view)

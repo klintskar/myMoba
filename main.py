@@ -8,8 +8,10 @@ SCREEN_TITLE = "myMoba"
 
 def main():
     # Set up the game window
+    print("Creating arcade.Window...")  # Debug 
     window = arcade.Window(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE, resizable=True)
-    
+    print(f"Window created: {window}")  # Debug
+
     # Create and show the main game view
     start_menu = StartMenuView()
     window.show_view(start_menu)

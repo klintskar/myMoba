@@ -46,9 +46,18 @@ class StartMenuView(arcade.View):
         self.ui_manager.draw()
 
     def start_singleplayer(self):
+        print("Starting singleplayer...")  # Debug
         username = self.username_input.text.strip() or "Player"
-        game_view = GameView(is_host=False, connection=None, username=username, all_usernames=[username])
+        game_view = GameView(
+            is_host=False,  # Ensure is_host is False for singleplayer
+            connection=None,
+            username=username,
+            all_usernames=[username]
+        )
+        game_view.setup_called = True  # Ensure setup is marked as called
+        game_view.setup_complete = True  # Mark setup as complete for singleplayer
         self.window.show_view(game_view)
+        print("Transitioned to singleplayer GameView")  # Debugging line
 
     def show_ip_input(self):
         if self.popup_widgets:
